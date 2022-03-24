@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.migration.name }}-{{ .Chart.AppVersion }}
+  labels:
+    app: {{ .Values.migration.name }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.migration.name }}
+    spec:
+      initContainers:
+      - name: busybox
+        image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+        imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+        securityContext:
+        {{- toYaml .Values.busybox.securityContext | nindent 12 }}
+        command:
+          - sh
+          - -c
+          - |
+            echo 'Waiting for PostgreSQL to become ready...'
+            until printf "." && nc -z -w 2 {{ printf "%s" .Values.appPG.fullnameOverride }} {{ .Values.appPG.service.port }}; do
+                sleep 10;
+            done;
+
+            echo 'PostgreSQL OK ?'
+      containers:
+        - name: {{ .Values.migration.name }}
+          image: "{{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ .Values.migration.configmapName }}
+          - secretRef:
+              name: {{ .Values.migration.secretName }}
+      restartPolicy: {{ .Values.migration.job.restartPolicy }}

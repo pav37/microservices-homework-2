@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deviceManagementService.name }}
+  labels:
+    app: {{ .Values.deviceManagementService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.deviceManagementService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deviceManagementService.name }}
+    spec:
+      serviceAccountName: app-service-account
+      initContainers:
+        - name: "{{ .Chart.Name }}-init"
+          image: "groundnuty/k8s-wait-for:1.3"
+          imagePullPolicy: Always
+          args:
+            - "job"
+            - "{{ .Values.deviceManagementMigration.name }}-{{ .Chart.AppVersion }}"
+        - name: auth-server-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for auth-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Values.authServer.name }} {{ .Values.authServer.portNumber }}; do
+                  sleep 10;
+              done;
+              echo 'auth-server OK ?'
+        - name: kafka-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for kafka-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Release.Name }}-kafka 9092; do
+                  sleep 10;
+              done;
+              echo 'kafka-server OK ?'
+      containers:
+        - name: {{ .Values.deviceManagementService.name }}
+          image: {{ .Values.deviceManagementService.image }}
+          env:
+            - name: ISSUER
+              value: {{ .Values.deviceManagementService.issuer }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.deviceManagementService.secretName }}
+            - configMapRef:
+                name: {{ .Values.deviceManagementService.configmapName }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.deviceManagementService.portNumber }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: {{ .Values.deviceManagementService.portNumber }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ .Values.deviceManagementService.portNumber }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: {{ .Values.deviceManagementService.resources.limits.cpu }}
+              memory: {{ .Values.deviceManagementService.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.deviceManagementService.resources.requests.cpu }}
+              memory: {{ .Values.deviceManagementService.resources.requests.memory }}

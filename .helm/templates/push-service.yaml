@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.pushService.name }}
+  labels:
+    app: {{ .Values.pushService.name }}
+spec:
+  selector:
+    app: {{ .Values.pushService.name }}
+  ports:
+    - port: {{ .Values.pushService.portNumberOut }}
+      targetPort: {{ .Values.pushService.portNumberOut }}
+      protocol: TCP
+      name: {{ .Values.pushService.name }}-out
+      nodePort: 30302
+    - port: {{ .Values.pushService.portNumberIn }}
+      targetPort: {{ .Values.pushService.portNumberIn }}
+      protocol: TCP
+      name: {{ .Values.pushService.name }}-in
+      nodePort: 30301
+  type: NodePort

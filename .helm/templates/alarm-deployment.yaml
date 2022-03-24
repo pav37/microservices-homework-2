@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.alarmService.name }}
+  labels:
+    app: {{ .Values.alarmService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.alarmService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.alarmService.name }}
+    spec:
+      serviceAccountName: app-service-account
+      initContainers:
+        - name: kafka-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for kafka-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Release.Name }}-kafka 9092; do
+                  sleep 10;
+              done;
+              echo 'kafka-server OK ?'
+      containers:
+        - name: {{ .Values.alarmService.name }}
+          image: {{ .Values.alarmService.image }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.alarmService.secretName }}
+            - configMapRef:
+                name: {{ .Values.alarmService.configmapName }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.alarmService.portNumber }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: {{ .Values.alarmService.portNumber }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ .Values.alarmService.portNumber }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: {{ .Values.alarmService.resources.limits.cpu }}
+              memory: {{ .Values.alarmService.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.alarmService.resources.requests.cpu }}
+              memory: {{ .Values.alarmService.resources.requests.memory }}

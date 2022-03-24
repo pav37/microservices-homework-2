@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.deviceManagementService.configmapName }}
+data:
+  APP_DB_HOST: {{ .Values.deviceManagementPG.fullnameOverride }}
+  APP_DB_NAME: {{ .Values.deviceManagementPG.postgresqlDatabase }}
+  APP_DB_PORT: {{ .Values.db.port | quote }}
+  APP_PORT: {{ .Values.deviceManagementService.portNumber | quote }}
+  APP_DB_USERNAME: {{ .Values.deviceManagementPG.postgresqlUsername }}
+  JAVA_OPTS: -Xms128m -Xmx256m

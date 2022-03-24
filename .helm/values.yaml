@@ -1,0 +1,449 @@
+migration:
+  name: migration-job
+  secretName: migration-secret
+  configmapName: migration-configmap
+  image:
+    repository: sp357468/migration
+    tag: "1.14"
+    pullPolicy: Always
+  job:
+    restartPolicy: Never
+
+deviceManagementMigration:
+  name: device-management-migration-job
+  secretName: device-management-migration-secret
+  configmapName: device-management-migration-configmap
+  image:
+    repository: sp357468/device-management-migration
+    tag: "1.5"
+    pullPolicy: Always
+  job:
+    restartPolicy: Never
+deviceManagementService:
+  name: dm-service
+  secretName: dm-secret
+  configmapName: dm-configmap
+  portNumber: 8000
+  ingressHost: arch.homework
+  image: sp357468/dm-service:1.41
+  issuer: http://arch.homework
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "1000Mi"
+    requests:
+      cpu: "0.5"
+      memory: "200Mi"
+deviceService:
+  name: device-service
+  secretName: device-secret
+  configmapName: device-configmap
+  portNumber: 8000
+  ingressHost: arch.homework
+  image: sp357468/device-service:1.17
+  issuer: http://arch.homework
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "1000Mi"
+    requests:
+      cpu: "0.5"
+      memory: "200Mi"
+device-redis:
+  master:
+    persistence:
+      size: 1Gi
+  replica:
+    replicaCount: 0
+  auth:
+    enabled: false
+device-management-redis:
+  master:
+    persistence:
+      size: 1Gi
+  replica:
+    replicaCount: 0
+  auth:
+    enabled: false
+
+alarmManagementMigration:
+  name: alarm-management-migration-job
+  secretName: alarm-management-migration-secret
+  configmapName: alarm-management-migration-configmap
+  image:
+    repository: sp357468/alarm-management-migration
+    tag: "1.7"
+    pullPolicy: Always
+  job:
+    restartPolicy: Never
+alarmManagementService:
+  name: alarm-management-service
+  secretName: alarm-management-secret
+  configmapName: alarm-management-configmap
+  portNumber: 8000
+  ingressHost: arch.homework
+  image: sp357468/alarm-management-service:1.11
+  issuer: http://arch.homework
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "1000Mi"
+    requests:
+      cpu: "0.5"
+      memory: "200Mi"
+alarmService:
+  name: alarm-service
+  secretName: alarm-secret
+  configmapName: alarm-configmap
+  portNumber: 8000
+  ingressHost: arch.homework
+  image: sp357468/alarm-service:1.16
+  issuer: http://arch.homework
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "1000Mi"
+    requests:
+      cpu: "0.5"
+      memory: "200Mi"
+alarm-redis:
+  master:
+    persistence:
+      size: 1Gi
+  replica:
+    replicaCount: 0
+  auth:
+    enabled: false
+
+adapterService:
+  name: adapter-service
+  configmapName: adapter-configmap
+  portNumber: 8000
+  ingressHost: arch.homework
+  image: sp357468/adapter:1.29
+  issuer: http://arch.homework
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "1000Mi"
+    requests:
+      cpu: "0.5"
+      memory: "200Mi"
+adapter-redis:
+  master:
+    persistence:
+      size: 1Gi
+  replica:
+    replicaCount: 0
+  auth:
+    enabled: false
+
+commandService:
+  name: command-service
+  configmapName: command-configmap
+  portNumber: 8000
+  ingressHost: arch.homework
+  image: sp357468/command-service:1.14
+  issuer: http://arch.homework
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "1000Mi"
+    requests:
+      cpu: "0.5"
+      memory: "200Mi"
+command-redis:
+  master:
+    persistence:
+      size: 1Gi
+  replica:
+    replicaCount: 0
+  auth:
+    enabled: false
+
+pushService:
+  name: push-service
+  secretName: push-secret
+  configmapName: push-configmap
+  portNumberIn: 7008
+  portNumberOut: 7001
+  ingressHost: arch.homework
+  image: sp357468/push-service:1.2
+  issuer: http://arch.homework
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "1000Mi"
+    requests:
+      cpu: "0.2"
+      memory: "200Mi"
+
+notificationService:
+  name: notification-service
+  secretName: notification-secret
+  configmapName: notification-configmap
+  portNumber: 8000
+  ingressHost: arch.homework
+  image: sp357468/notification-service:1.43
+  issuer: http://arch.homework
+  redis:
+    host: app-notifications-redis-master
+    port: 6379
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "1000Mi"
+    requests:
+      cpu: "0.2"
+      memory: "200Mi"
+notifications-redis:
+  master:
+    persistence:
+      size: 1Gi
+  replica:
+    replicaCount: 0
+  auth:
+    enabled: false
+
+db:
+  pgUsername: postgres
+  password: cXdlcg==
+  port: 5432
+appPG:
+  primary:
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/path: "/metrics/cluster"
+      prometheus.io/port: "9000"
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  existingSecret: pg-secret
+  postgresqlDatabase: app
+  postgresqlUsername: app
+  persistence:
+    size: 1Gi
+    enabled: false
+  image:
+#    tag: 13.1.0
+    debug: true
+  fullnameOverride: myapp-pg
+  service:
+    type: NodePort
+    nodePort: 30533
+  volumePermissions:
+    enabled: true
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "2000Mi"
+    requests:
+      cpu: "0.2"
+      memory: "200Mi"
+
+deviceManagementPG:
+  primary:
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/path: "/metrics/cluster"
+      prometheus.io/port: "9000"
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  existingSecret: pg-secret
+  postgresqlDatabase: dm
+  postgresqlUsername: dm
+  persistence:
+    size: 1Gi
+    enabled: false
+  image:
+    tag: 13.1.0
+    debug: true
+  fullnameOverride: dm-pg
+  service:
+    type: NodePort
+    nodePort: 30535
+  volumePermissions:
+    enabled: true
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "2000Mi"
+    requests:
+      cpu: "0.2"
+      memory: "200Mi"
+
+
+alarmManagementPG:
+  primary:
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/path: "/metrics/cluster"
+      prometheus.io/port: "9000"
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  existingSecret: pg-secret
+  postgresqlDatabase: am
+  postgresqlUsername: am
+  persistence:
+    size: 1Gi
+    enabled: false
+  image:
+    tag: 13.1.0
+    debug: true
+  fullnameOverride: am-pg
+  service:
+    type: NodePort
+    nodePort: 30536
+  volumePermissions:
+    enabled: true
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "2000Mi"
+    requests:
+      cpu: "0.2"
+      memory: "200Mi"
+
+busybox:
+  image:
+    repository: docker.io/busybox
+    tag: 1.32
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: "0.1"
+      memory: "200Mi"
+    requests:
+      cpu: "0.2"
+      memory: "200Mi"
+
+
+authServer:
+  name: auth-server
+  secretName: auth-server-secret
+  configmapName: auth-server-configmap
+  portNumber: 9000
+  ingressHost: arch.homework
+  image: sp357468/auth-server:3.2
+  redirectUri: http://arch.homework/
+  issuer: http://arch.homework
+  resources:
+    limits:
+      cpu: "1.0"
+      memory: "500Mi"
+    requests:
+      cpu: "0.2"
+      memory: "200Mi"
+
+metrics:
+  serviceMonitor:
+    enabled: true
+
+ingressAuth:
+  enabled: true
+
+oauth2Proxy:
+  name: app-oauth2-proxy
+  port: 80
+
+oauth2-proxy:
+  redis:
+    enabled: false
+  initContainers:
+    - name: auth-server-checker
+      image: "docker.io/busybox:1.32"
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          echo 'Waiting for auth-server to become ready...'
+          until printf "." && nc -z -w 2  auth-server 9000; do
+              sleep 10;
+          done;
+          echo 'auth-server OK ?'
+  args:
+    - --scope=openid read
+    - --pass-authorization-header=true
+    - --pass-access-token=true
+    - --set-xauthrequest=true
+    - --email-domain=*
+    - --cookie-domain=arch.homework
+    - --whitelist-domain=arch.homework
+    - --cookie-secure=true
+    - --insecure-oidc-allow-unverified-email=true
+    - --insecure-oidc-skip-issuer-verification=true
+    - --pass-basic-auth=true
+    - --pass-user-headers=true
+    - --request-logging=true
+    - --set-authorization-header=true
+    - --show-debug-on-error=true
+    - --ssl-insecure-skip-verify=true
+    - --silence-ping-logging=true
+    - --standard-logging=true
+
+  image:
+    repository: sp357468/oauth2-proxy
+    tag: "1.0"
+
+  configuration:
+    clientID: "users-client"
+    clientSecret: "secret"
+    cookieSecret: "V1owZUdNb3FOTGh6SEpnQzBiT2ptUT09"
+
+  extraEnvVars:
+    - name: OAUTH2_PROXY_PROVIDER
+      value: "oidc"
+    - name: OAUTH2_PROXY_OIDC_ISSUER_URL
+      value: "http://arch.homework"
+    - name: OAUTH2_PROXY_HTTP_ADDRESS
+      value: "0.0.0.0:4180"
+    - name: OAUTH2_PROXY_UPSTREAMS
+      value: "file:///dev/null"
+
+  ingress:
+    enabled: false
+    hosts:
+      - arch.homework
+    path: /oauth2
+
+kafka:
+  persistence:
+    size: 8Gi
+  zookeeper:
+    persistence:
+      size: 8Gi
+  metrics:
+    kafka:
+      enabled: true
+  service:
+    type: NodePort
+    nodePorts:
+      client: 30542
+      external: 30543
+  resources:
+    limits:
+      cpu: "2.0"
+      memory: "4000Mi"
+    requests:
+      cpu: "0.5"
+      memory: "2000Mi"
+
+cassandra:
+  enabled: false
+  fullnameOverride: cassandra-measures
+  dbUser:
+    password: qwer
+
+prometheus:
+  enabled: false
+  prometheus:
+    prometheusSpec:
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector: {}
+

@@ -1,0 +1,1059 @@
+{
+	"info": {
+		"_postman_id": "a9960208-8ee7-4d16-999f-30c3a86bb744",
+		"name": "Microservices Homework",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User 1 Register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", () => {",
+							"  pm.response.to.have.status(201);",
+							"});",
+							"var responseJSON = JSON.parse(responseBody)",
+							"pm.collectionVariables.set(\"user1Id\", responseJSON[\"id\"])",
+							"//console.log(pm.request)",
+							"//console.log(pm.response)"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set('username1', pm.variables.replaceIn(\"{{$randomUserName}}\"))\r",
+							"pm.collectionVariables.set('password1', pm.variables.replaceIn(\"{{$randomLoremWord}}\"))\r",
+							"console.log(\"username1: \" + pm.collectionVariables.get('username1'))\r",
+							"console.log(\"password1: \" + pm.collectionVariables.get('password1'))"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"{{username1}}\", \"email\": \"{{$randomLoremWord}}@arch.homework\", \"password\": \"{{password1}}\", \"firstName\": \"{{$randomFirstName}}\", \"lastName\": \"{{$randomLastName}}\"  }"
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/register",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User 1 Init Session",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 401\", () => {\r",
+							"  pm.response.to.have.status(401);\r",
+							"});\r",
+							"//console.log(pm.request)\r",
+							"//console.log(pm.response)"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"strictSSL": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/hello",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"hello"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User 1 Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {\r",
+							"  pm.response.to.have.status(200);\r",
+							"});\r",
+							"//console.log(pm.request)\r",
+							"//console.log(pm.response)"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"strictSSL": false
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "username",
+							"value": "{{username1}}",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{password1}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/login",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Device With Sensor",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"console.log(pm.request)",
+							"console.log(pm.response)"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let guid1 = require('uuid').v4()\r",
+							"let guid2 = require('uuid').v4()\r",
+							"\r",
+							"pm.collectionVariables.set('deviceId', guid1)\r",
+							"pm.collectionVariables.set('sensorId', guid2)\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/management/create_device?sensorId={{sensorId}}&deviceId={{deviceId}}&parameterName=temperature",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"management",
+						"create_device"
+					],
+					"query": [
+						{
+							"key": "sensorId",
+							"value": "{{sensorId}}"
+						},
+						{
+							"key": "deviceId",
+							"value": "{{deviceId}}"
+						},
+						{
+							"key": "parameterName",
+							"value": "temperature"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Clear Notifications",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/notifications/clear",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Notifications",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/notifications",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Command Set Value 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 202\", () => {",
+							"  pm.response.to.have.status(202);",
+							"});",
+							"console.log(pm.request)",
+							"console.log(pm.response)"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set('deviceId', pm.collectionVariables.get(\"deviceId\"))\r",
+							"pm.collectionVariables.set('sensorId', pm.collectionVariables.get(\"sensorId\"))\r",
+							"pm.collectionVariables.set('command1Value', 34.4)\r",
+							"\r",
+							"let guid1 = require('uuid').v4()\r",
+							"pm.collectionVariables.set('requestId', guid1)\r",
+							"pm.collectionVariables.set('counter', 0)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Request-Id",
+						"value": "{{requestId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/command/set_value?sensorId={{sensorId}}&deviceId={{deviceId}}&value={{command1Value}}",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"command",
+						"set_value"
+					],
+					"query": [
+						{
+							"key": "sensorId",
+							"value": "{{sensorId}}"
+						},
+						{
+							"key": "deviceId",
+							"value": "{{deviceId}}"
+						},
+						{
+							"key": "value",
+							"value": "{{command1Value}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Parameter Value",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"//console.log(pm.request)",
+							"//console.log(pm.response)",
+							"const response = pm.response.json(); // Parse the response",
+							"pm.collectionVariables.set(\"oldValue\", response.value)",
+							"",
+							"let result = (pm.collectionVariables.get(\"command1Value\") == response.value);",
+							"console.log(\"commandValue \" + pm.collectionVariables.get(\"command1Value\") + \" Response \" + response.value)",
+							"if (!result) { ",
+							"  let val = pm.collectionVariables.get(\"counter\");",
+							"  console.log(\"go next \" + val + \" \" + (val < 5))",
+							"  if (val < 5) {",
+							"    pm.collectionVariables.set(\"counter\", parseInt(val) + 1)",
+							"    setTimeout(() => {}, 1000); ",
+							"    postman.setNextRequest(pm.info.requestId);",
+							"  }",
+							"} else {",
+							"    pm.test(\"Test Value In Command Response\", function () {",
+							"        pm.expect(result, \"Incorrect value \" + response.value);",
+							"    })",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/management/sensors/{{sensorId}}",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"management",
+						"sensors",
+						"{{sensorId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Command Success Notification",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"const response = pm.response.json(); // Parse the response",
+							"console.log(response)",
+							"let result = false;",
+							"",
+							"response.forEach(function(e) {",
+							"    if (e != null && e.hasOwnProperty(\"body\")) {",
+							"        let body = JSON.parse(e.body);",
+							"        let testCondition = e.username === pm.collectionVariables.get(\"username1\") && body.sensorId === pm.collectionVariables.get(\"sensorId\") ",
+							"                                && body.deviceId === pm.collectionVariables.get(\"deviceId\") ",
+							"                                && e.eventType === \"adapter.value_set_sent\" ",
+							"                                && parseFloat(body.value) === parseFloat(pm.collectionVariables.get(\"command1Value\"))",
+							"",
+							"        if (testCondition) {",
+							"            console.log(\"Found success response:\");",
+							"            console.log(e);",
+							"            result = true;",
+							"        }",
+							"    } ",
+							"});",
+							"",
+							"if (!result) { ",
+							"  let val = pm.collectionVariables.get(\"counter\");",
+							"  console.log(\"go next \" + val + \" \" + (val < 5))",
+							"  if (val < 5) {",
+							"    pm.collectionVariables.set(\"counter\", parseInt(val) + 1)",
+							"    setTimeout(() => {}, 1000); ",
+							"    postman.setNextRequest(pm.info.requestId);",
+							"  }",
+							"} else {",
+							"    pm.test(\"Check Notification Response\", function () {",
+							"        pm.expect(result);",
+							"    })",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/notifications",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Clear Notifications",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/notifications/clear",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Command Set Value 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 202\", () => {",
+							"  pm.response.to.have.status(202);",
+							"});",
+							"console.log(pm.request)",
+							"console.log(pm.response)"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set('deviceId', pm.collectionVariables.get(\"deviceId\"))\r",
+							"pm.collectionVariables.set('sensorId', pm.collectionVariables.get(\"sensorId\"))\r",
+							"pm.collectionVariables.set('command1Value', 74.4)\r",
+							"\r",
+							"let guid1 = require('uuid').v4()\r",
+							"pm.collectionVariables.set('requestId', guid1)\r",
+							"pm.collectionVariables.set('counter', 0)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Request-Id",
+						"value": "{{requestId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/command/set_value?sensorId={{sensorId}}&deviceId={{deviceId}}&value={{command1Value}}",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"command",
+						"set_value"
+					],
+					"query": [
+						{
+							"key": "sensorId",
+							"value": "{{sensorId}}"
+						},
+						{
+							"key": "deviceId",
+							"value": "{{deviceId}}"
+						},
+						{
+							"key": "value",
+							"value": "{{command1Value}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Command Fail Notification Adapter Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"const response = pm.response.json(); ",
+							"console.log(response)",
+							"let result = false;",
+							"",
+							"response.forEach(function(e) {",
+							"    if (e != null && e.hasOwnProperty(\"body\")) {",
+							"        let body = JSON.parse(e.body);",
+							"        let testCondition = e.username === pm.collectionVariables.get(\"username1\") && body.sensorId === pm.collectionVariables.get(\"sensorId\") ",
+							"                                && body.deviceId === pm.collectionVariables.get(\"deviceId\") ",
+							"                                && e.eventType === \"adapter.value_set_error\" ",
+							"                                && parseFloat(body.value) === parseFloat(pm.collectionVariables.get(\"command1Value\"))",
+							"",
+							"        if (testCondition) {",
+							"            console.log(\"Found success response:\");",
+							"            console.log(e);",
+							"            result = true;",
+							"        }",
+							"    } ",
+							"});",
+							"",
+							"if (!result) { ",
+							"  let val = pm.collectionVariables.get(\"counter\");",
+							"  console.log(\"go next \" + val + \" \" + (val < 5))",
+							"  if (val < 5) {",
+							"    pm.collectionVariables.set(\"counter\", parseInt(val) + 1)",
+							"    setTimeout(() => {}, 1000); ",
+							"    postman.setNextRequest(pm.info.requestId);",
+							"  }",
+							"} else {",
+							"    pm.test(\"Check Notification Response\", function () {",
+							"        pm.expect(result);",
+							"    })",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/notifications",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Command Fail Notification Device Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"const response = pm.response.json(); ",
+							"console.log(response)",
+							"let result = false;",
+							"",
+							"response.forEach(function(e) {",
+							"    if (e != null && e.hasOwnProperty(\"body\")) {",
+							"        let body = JSON.parse(e.body);",
+							"        let testCondition = e.username === pm.collectionVariables.get(\"username1\") && body.sensorId === pm.collectionVariables.get(\"sensorId\") ",
+							"                                && body.deviceId === pm.collectionVariables.get(\"deviceId\") ",
+							"                                && e.eventType === \"dm.value_set_error\" ",
+							"                                && parseFloat(body.value) === parseFloat(pm.collectionVariables.get(\"command1Value\"))",
+							"",
+							"        if (testCondition) {",
+							"            console.log(\"Found success response:\");",
+							"            console.log(e);",
+							"            result = true;",
+							"        }",
+							"    } ",
+							"});",
+							"",
+							"if (!result) { ",
+							"  let val = pm.collectionVariables.get(\"counter\");",
+							"  console.log(\"go next \" + val + \" \" + (val < 5))",
+							"  if (val < 5) {",
+							"    pm.collectionVariables.set(\"counter\", parseInt(val) + 1)",
+							"    setTimeout(() => {}, 1000); ",
+							"    postman.setNextRequest(pm.info.requestId);",
+							"  }",
+							"} else {",
+							"    pm.test(\"Check Notification Response\", function () {",
+							"        pm.expect(result);",
+							"    })",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/notifications",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Parameter Value Not Changed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const response = pm.response.json(); ",
+							"",
+							"pm.test(\"Check Parameter is not changed\", function () {",
+							"    let a = parseFloat(pm.collectionVariables.get(\"oldValue\"));",
+							"    pm.expect(response.value).is.eqls(a);",
+							"})",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/management/sensors/{{sensorId}}",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"management",
+						"sensors",
+						"{{sensorId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User 1 Logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {\r",
+							"  pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"strictSSL": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/logout",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userId",
+			"value": 3
+		},
+		{
+			"key": "baseUrl",
+			"value": "arch.homework"
+		},
+		{
+			"key": "username1",
+			"value": ""
+		},
+		{
+			"key": "password1",
+			"value": ""
+		},
+		{
+			"key": "user1Id",
+			"value": ""
+		},
+		{
+			"key": "username2",
+			"value": ""
+		},
+		{
+			"key": "password2",
+			"value": ""
+		},
+		{
+			"key": "user2Id",
+			"value": ""
+		},
+		{
+			"key": "firstName1_Update",
+			"value": ""
+		},
+		{
+			"key": "lastName1_Update",
+			"value": ""
+		},
+		{
+			"key": "command1DeviceId",
+			"value": ""
+		},
+		{
+			"key": "command1SensorId",
+			"value": ""
+		},
+		{
+			"key": "command1Value",
+			"value": ""
+		},
+		{
+			"key": "deviceId",
+			"value": ""
+		},
+		{
+			"key": "sensorId",
+			"value": ""
+		},
+		{
+			"key": "command2Value",
+			"value": ""
+		},
+		{
+			"key": "counter",
+			"value": ""
+		},
+		{
+			"key": "requestId",
+			"value": ""
+		},
+		{
+			"key": "command4Value",
+			"value": ""
+		},
+		{
+			"key": "command3Value",
+			"value": ""
+		},
+		{
+			"key": "oldValue",
+			"value": ""
+		}
+	]
+}

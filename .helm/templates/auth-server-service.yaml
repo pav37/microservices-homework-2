@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.authServer.name }}
+  labels:
+    app: {{ .Values.authServer.name }}
+spec:
+  selector:
+    app: {{ .Values.authServer.name }}
+  ports:
+    - port: {{ .Values.authServer.portNumber }}
+      targetPort: {{ .Values.authServer.portNumber }}
+      protocol: TCP
+      name: {{ .Values.authServer.name }}-web
+  type: NodePort

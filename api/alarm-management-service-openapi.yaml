@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: Тревоги (алармы)
+  version: 0.1.0
+tags:
+  - name: alarm
+    description: Сервис управления тревогами
+paths:
+  /alarms:
+    post:
+      tags:
+        - alarm
+      summary: Просмотр списка тревог
+      operationId: alarms
+      responses:
+        '200':
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alarm'
+
+components:
+  schemas:
+    Alarm:
+      type: array
+      properties:
+        id:
+          type: integer
+        value:
+          type: string
+        dateTime:
+          type: object
+        alarmType:
+          type: object
+          $ref: '#/components/schemas/AlarmType'
+    AlarmType:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        parameterName:
+          type: string
+        minValue:
+          type: string
+        maxValue:
+          type: string
+        zoneType:
+          type: object
+          $ref: '#/components/schemas/ZoneType'
+    ZoneType:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        code:
+          type: string

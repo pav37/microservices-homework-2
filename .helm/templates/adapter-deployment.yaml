@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.adapterService.name }}
+  labels:
+    app: {{ .Values.adapterService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.adapterService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.adapterService.name }}
+    spec:
+      serviceAccountName: app-service-account
+      initContainers:
+        - name: kafka-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for kafka-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Release.Name }}-kafka 9092; do
+                  sleep 10;
+              done;
+              echo 'kafka-server OK ?'
+      containers:
+        - name: {{ .Values.adapterService.name }}
+          image: {{ .Values.adapterService.image }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.adapterService.configmapName }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.adapterService.portNumber }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: {{ .Values.adapterService.portNumber }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ .Values.adapterService.portNumber }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: {{ .Values.adapterService.resources.limits.cpu }}
+              memory: {{ .Values.adapterService.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.adapterService.resources.requests.cpu }}
+              memory: {{ .Values.adapterService.resources.requests.memory }}

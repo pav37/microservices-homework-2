@@ -1,0 +1,62 @@
+asyncapi: 2.0.0
+info:
+  title: Сервис обновления данных по устройствам
+  version: '1.0.0'
+defaultContentType: application/json
+
+channels:
+  dm/value_set_approved:
+    subscribe:
+      message:
+        name: dm.value_set_approved
+        title: Установка значения подтверждена
+        payload:
+          $ref: "#/components/schemas/commandPayload"
+
+  command/value_set:
+    publish:
+      message:
+        name: command.value_set
+        title: Установить значение на устройстве
+        payload:
+          $ref: "#/components/schemas/commandPayload"
+
+components:
+  schemas:
+    commandPayload:
+      type: object
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        deviceId:
+          type: string
+          format: uuid
+        sensorId:
+          type: string
+          format: uuid
+        value:
+          type: string
+        actionType:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+      required:
+        - deviceId
+        - sensorId
+        - value
+        - username
+        - email
+        - actionType
+        - messageId
+      examples:
+        - payload:
+            messageId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+            deviceId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+            sensorId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+            value: 5.0
+            username: Tyshawn
+            actionType: set
+            email: "user@example.org"

@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: Сервис управления устройствами
+  version: 0.1.0
+tags:
+  - name: device-management
+    description: Сервис управления устройствами
+paths:
+  /management/create_device:
+    post:
+      tags:
+        - device-management
+      summary: Создание устройства с сенсором
+      operationId: createDevice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deviceId:
+                  type: string
+                  format: uuid
+                sensorId:
+                  type: string
+                  format: uuid
+                parameterName:
+                  type: string
+              required:
+                - deviceId
+                - sensorId
+                - parameterName
+            example:
+              deviceId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+              sensorId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+              parameterName: temperature
+      responses:
+        '201':
+          description: Операция выполнена успешна
+
+  /management/devices/{id}:
+    post:
+      tags:
+        - device-management
+      summary: Получение информации по устройству
+      operationId: getDevice
+      responses:
+        '200':
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+
+components:
+  schemas:
+    Sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        parameterName:
+          type: string
+        value:
+          type: string
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sensor'
+
+

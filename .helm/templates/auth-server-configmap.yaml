@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.authServer.configmapName }}
+data:
+  APP_DB_HOST: {{ .Values.appPG.fullnameOverride }}
+  APP_DB_NAME: {{ .Values.appPG.postgresqlDatabase }}
+  APP_DB_PORT: {{ .Values.db.port | quote }}
+  APP_PORT: {{ .Values.authServer.portNumber | quote }}
+  APP_DB_USERNAME: {{ .Values.appPG.postgresqlUsername }}
+  JAVA_OPTS: -Xms128m -Xmx256m

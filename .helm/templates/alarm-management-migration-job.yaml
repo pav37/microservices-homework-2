@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.alarmManagementMigration.name }}-{{ .Chart.AppVersion }}
+  labels:
+    app: {{ .Values.alarmManagementMigration.name }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.alarmManagementMigration.name }}
+    spec:
+      initContainers:
+      - name: busybox
+        image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+        imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+        securityContext:
+        {{- toYaml .Values.busybox.securityContext | nindent 12 }}
+        command:
+          - sh
+          - -c
+          - |
+            echo 'Waiting for PostgreSQL to become ready...'
+            until printf "." && nc -z -w 2 {{ printf "%s" .Values.alarmManagementPG.fullnameOverride }} {{ .Values.alarmManagementPG.service.port }}; do
+                sleep 10;
+            done;
+
+            echo 'PostgreSQL OK ?'
+      containers:
+        - name: {{ .Values.alarmManagementMigration.name }}
+          image: "{{ .Values.alarmManagementMigration.image.repository }}:{{ .Values.alarmManagementMigration.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.alarmManagementMigration.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ .Values.alarmManagementMigration.configmapName }}
+          - secretRef:
+              name: {{ .Values.alarmManagementMigration.secretName }}
+      restartPolicy: {{ .Values.alarmManagementMigration.job.restartPolicy }}

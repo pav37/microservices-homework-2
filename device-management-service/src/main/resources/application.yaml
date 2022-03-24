@@ -1,0 +1,73 @@
+server.port: ${APP_PORT}
+management.endpoints.web.base-path: /
+management.endpoint.health.status.order: fatal,down,out-of-service,unknown,ok,up
+management.endpoint.health.probes.enabled: true
+management.health.livenessState.enabled: true
+management.health.readinessState.enabled: true
+
+management.metrics.distribution.percentiles-histogram.http.server.requests: true
+management.metrics.distribution.sla.http.server.requests: 100ms,500ms
+management.metrics.enable.jvm: true
+management.metrics.enable.all: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+
+spring:
+  redis:
+    host: app-device-management-redis-master
+    port: 6379
+  metrics:
+    web:
+      server:
+        auto-time-requests: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${issuer:http://auth-server:9000}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: dmService
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+      client:
+        request:
+          autotime:
+            enabled: true
+  endpoint:
+    prometheus:
+      enabled: true
+    metrics:
+      enabled: true
+
+spring.datasource.url: jdbc:postgresql://${APP_DB_HOST:192.168.137.77}:${APP_DB_PORT:30535}/${APP_DB_NAME:app}
+spring.datasource.username: ${APP_DB_USERNAME:app}
+spring.datasource.password: ${APP_DB_PASSWORD:qwer}
+spring.datasource.driver-class-name: org.postgresql.Driver
+spring.jpa.database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+kafka:
+  consumer:
+    id: consumerServer
+  producer:
+    id: producerServer
+  server: app-kafka:9092
+  group:
+    id: server.broadcast

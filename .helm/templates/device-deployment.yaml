@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deviceService.name }}
+  labels:
+    app: {{ .Values.deviceService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.deviceService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deviceService.name }}
+    spec:
+      serviceAccountName: app-service-account
+      initContainers:
+        - name: kafka-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for kafka-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Release.Name }}-kafka 9092; do
+                  sleep 10;
+              done;
+              echo 'kafka-server OK ?'
+      containers:
+        - name: {{ .Values.deviceService.name }}
+          image: {{ .Values.deviceService.image }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.deviceService.secretName }}
+            - configMapRef:
+                name: {{ .Values.deviceService.configmapName }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.deviceService.portNumber }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: {{ .Values.deviceService.portNumber }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ .Values.deviceService.portNumber }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: {{ .Values.deviceService.resources.limits.cpu }}
+              memory: {{ .Values.deviceService.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.deviceService.resources.requests.cpu }}
+              memory: {{ .Values.deviceService.resources.requests.memory }}

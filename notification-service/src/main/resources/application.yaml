@@ -1,0 +1,75 @@
+server.port: ${APP_PORT}
+management.endpoints.web.base-path: /
+management.endpoint.health.status.order: fatal,down,out-of-service,unknown,ok,up
+management.endpoint.health.probes.enabled: true
+management.health.livenessState.enabled: true
+management.health.readinessState.enabled: true
+
+management.metrics.distribution.percentiles-histogram.http.server.requests: true
+management.metrics.distribution.sla.http.server.requests: 100ms,500ms
+management.metrics.enable.jvm: true
+management.metrics.enable.all: true
+
+app:
+  push:
+    retry:
+      maxAttempts: 20
+      maxDelay: 5000
+    port: 7008
+    host: push-service
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+
+spring:
+  redis:
+    host: app-notifications-redis-master
+    port: 6379
+  metrics:
+    web:
+      server:
+        auto-time-requests: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${issuer:http://auth-server:9000}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: notificationService
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+      client:
+        request:
+          autotime:
+            enabled: true
+  endpoint:
+    prometheus:
+      enabled: true
+    metrics:
+      enabled: true
+
+kafka:
+  consumer:
+    id: consumerNotificationService
+  producer:
+    id: producerNotificationService
+  server: app-kafka:9092
+  group:
+    id: groupNotificationService

@@ -1,0 +1,54 @@
+apiVersion: v2
+name: myapp
+description: A Helm chart for myapp
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+dependencies:
+  - name: postgresql
+    alias: appPG
+    version: 9.1.1
+    repository: https://charts.bitnami.com/bitnami
+  - name: oauth2-proxy
+    version: 1.3.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: kafka
+    version: 15.0.1
+    repository: https://charts.bitnami.com/bitnami
+  - name: postgresql
+    alias: deviceManagementPG
+    version: 9.1.1
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    alias: notifications-redis
+    version: 16.3.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    alias: device-management-redis
+    version: 16.3.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    alias: device-redis
+    version: 16.3.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    alias: command-redis
+    version: 16.3.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    alias: adapter-redis
+    version: 16.3.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: postgresql
+    alias: alarmManagementPG
+    version: 9.1.1
+    repository: https://charts.bitnami.com/bitnami
+  - name: cassandra
+    version: 9.1.11
+    repository: https://charts.bitnami.com/bitnami
+    condition: cassandra.enabled
+  - name: kube-prometheus-stack
+    alias: prometheus
+    version: 34.1.1
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus.enabled

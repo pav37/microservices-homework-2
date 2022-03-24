@@ -1,0 +1,61 @@
+asyncapi: 2.0.0
+info:
+  title: Сервис создания тревог (алармов)
+  version: '1.0.0'
+defaultContentType: application/json
+
+channels:
+  alarm/alarm_created:
+    subscribe:
+      message:
+        name: alarm.alarm_created
+        title: Создание тревоги
+        payload:
+          $ref: "#/components/schemas/alarmPayload"
+
+components:
+  schemas:
+    alarmPayload:
+      type: object
+      properties:
+        alarmId:
+          type: string
+          format: uuid
+        deviceId:
+          type: string
+          format: uuid
+        value:
+          type: string
+        minValue:
+          type: string
+        maxValue:
+          type: string
+        alarmTypeName:
+          type: string
+        parameterName:
+          type: string
+        zoneTypeName:
+          type: string
+        message:
+          type: string
+      required:
+        - deviceId
+        - alarmId
+        - value
+        - minValue
+        - maxValue
+        - alarmTypeName
+        - parameterName
+        - zoneTypeName
+        - message
+      examples:
+        - payload:
+            alarmId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+            deviceId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+            value: 5.0
+            minValue: 4.0
+            maxValue: 6.0
+            parameterName: temperature
+            alarmTypeName: Превышение температуры
+            zoneTypeName: Красная зона
+            message: Превышение температуры на датчике 1

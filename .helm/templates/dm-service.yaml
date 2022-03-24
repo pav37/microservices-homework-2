@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.deviceManagementService.name }}
+  labels:
+    app: {{ .Values.deviceManagementService.name }}
+spec:
+  selector:
+    app: {{ .Values.deviceManagementService.name }}
+  ports:
+    - port: {{ .Values.deviceManagementService.portNumber }}
+      targetPort: {{ .Values.deviceManagementService.portNumber }}
+      protocol: TCP
+      name: {{ .Values.deviceManagementService.name }}-web
+  type: NodePort

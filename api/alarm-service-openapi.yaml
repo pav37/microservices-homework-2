@@ -1,0 +1,127 @@
+openapi: 3.0.0
+info:
+  title: Отправка команд
+  version: 0.1.0
+tags:
+  - name: command
+    description: Сервис отправки команд
+  - name: device-management
+    description: Сервис управления устройствами
+  - name: notification
+    description: Сервис нотификаций
+paths:
+  /command_set_value:
+    post:
+      tags:
+        - command
+      summary: Отправка команды
+      description: Отправка команды. Также отправляется сообщение пользователю и устанавливается переданное значение на устройстве.
+      operationId: sendCommand
+      requestBody:
+        $ref: '#/components/requestBodies/Command'
+      responses:
+        '201':
+          description: Отправка команды прошла успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+        '400':
+          description: Неправильный запрос
+  /set_value:
+    post:
+      tags:
+        - device-management
+      summary: Изменение значения параметра на устройстве
+      description: Метод для изменений значений параметров на устройствах
+      operationId: setValue
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deviceId:
+                  type: string
+                  format: uuid
+                sensorId:
+                  type: string
+                  format: uuid
+                value:
+                  type: string
+              required:
+                - deviceId
+                - sensorId
+                - value
+            example:
+              deviceId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+              sensorId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+              value: 5.0
+      responses:
+        '201':
+          description: Значение изменено успешно
+  /send_email:
+    post:
+      tags:
+        - notification
+      summary: Отправить email на почту
+      operationId: sendEmail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                templateId:
+                  type: integer
+                context:
+                  type: object
+              required:
+                - email
+                - templateId
+                - context
+            example:
+              email: "user@example.org"
+              templateId: 1
+              context:
+                username: Tyshawn
+                result: success
+      responses:
+        '202':
+          description: Сообщение успешно отправлено
+
+components:
+  schemas:
+    Command:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        sensorId:
+          type: string
+          format: uuid
+        value:
+          type: string
+      required:
+          - deviceId
+          - sensorId
+          - value
+  requestBodies:
+    Command:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Command'
+          examples:
+            sample-command:
+              summary: Пример команды
+              value:
+                deviceId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+                sensorId: 64ca86da-1482-4d7e-9f0c-9adc8ba1e4cc
+                value: 5.0
+      description: Command
+      required: true

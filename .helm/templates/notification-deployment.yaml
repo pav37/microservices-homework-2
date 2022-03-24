@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.notificationService.name }}
+  labels:
+    app: {{ .Values.notificationService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.notificationService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.notificationService.name }}
+    spec:
+      serviceAccountName: app-service-account
+      initContainers:
+        - name: redis-server-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for redis-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Values.notificationService.redis.host }} {{ .Values.notificationService.redis.port }}; do
+                  sleep 10;
+              done;
+              echo 'redis-server OK ?'
+        - name: auth-server-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for auth-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Values.authServer.name }} {{ .Values.authServer.portNumber }}; do
+                  sleep 10;
+              done;
+              echo 'auth-server OK ?'
+        - name: kafka-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for kafka-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Release.Name }}-kafka 9092; do
+                  sleep 10;
+              done;
+              echo 'kafka-server OK ?'
+      containers:
+        - name: {{ .Values.notificationService.name }}
+          image: {{ .Values.notificationService.image }}
+          env:
+            - name: ISSUER
+              value: {{ .Values.notificationService.issuer }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.notificationService.configmapName }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.notificationService.portNumber }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: {{ .Values.notificationService.portNumber }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ .Values.notificationService.portNumber }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: {{ .Values.notificationService.resources.limits.cpu }}
+              memory: {{ .Values.notificationService.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.notificationService.resources.requests.cpu }}
+              memory: {{ .Values.notificationService.resources.requests.memory }}

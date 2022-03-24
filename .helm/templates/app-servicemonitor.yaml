@@ -1,0 +1,20 @@
+{{- if .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.alarmService.name }}-monitor
+  labels:
+    app: {{ .Values.alarmService.name }}
+spec:
+  jobLabel: {{ .Values.alarmService.name }}
+  namespaceSelector:
+    matchNames:
+    - "{{ $.Release.Namespace }}"
+  selector:
+    matchLabels:
+      app: {{ .Values.alarmService.name }}
+  endpoints:
+  - interval: 15s
+    port: {{ .Values.alarmService.name }}-web
+    path: /prometheus
+{{- end }}

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.alarmManagementMigration.configmapName }}
+data:
+  DB_HOST: {{ .Values.alarmManagementPG.fullnameOverride }}
+  DB_NAME: {{ .Values.alarmManagementPG.postgresqlDatabase }}
+  DB_PORT: {{ .Values.alarmManagementPG.service.port | quote }}
+  MIGRATION_DB_USER: {{ .Values.alarmManagementPG.postgresqlUsername}}

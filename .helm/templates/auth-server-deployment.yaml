@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.authServer.name }}
+  labels:
+    app: {{ .Values.authServer.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.authServer.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.authServer.name }}
+    spec:
+      serviceAccountName: app-service-account
+      initContainers:
+        - name: "{{ .Chart.Name }}-init"
+          image: "groundnuty/k8s-wait-for:1.3"
+          imagePullPolicy: Always
+          args:
+            - "job"
+            - "{{ .Values.migration.name }}-{{ .Chart.AppVersion }}"
+      containers:
+        - name: {{ .Values.authServer.name }}
+          image: {{ .Values.authServer.image }}
+          env:
+            - name: CONFIG_ISSUER
+              value: {{ .Values.authServer.issuer }}
+            - name: CONFIG_REDIRECTURI
+              value: {{ .Values.authServer.redirectUri }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.authServer.secretName }}
+            - configMapRef:
+                name: {{ .Values.authServer.configmapName }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.authServer.portNumber }}
+{{/*          readinessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /health/readiness*/}}
+{{/*              port: {{ .Values.authServer.portNumber }}*/}}
+{{/*            initialDelaySeconds: 5*/}}
+{{/*            periodSeconds: 10*/}}
+{{/*          livenessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /health/liveness*/}}
+{{/*              port: {{ .Values.authServer.portNumber }}*/}}
+{{/*            initialDelaySeconds: 15*/}}
+{{/*            periodSeconds: 20*/}}
+          resources:
+            limits:
+              cpu: {{ .Values.authServer.resources.limits.cpu }}
+              memory: {{ .Values.authServer.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.authServer.resources.requests.cpu }}
+              memory: {{ .Values.authServer.resources.requests.memory }}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.alarmManagementService.name }}
+  labels:
+    app: {{ .Values.alarmManagementService.name }}
+spec:
+  selector:
+    app: {{ .Values.alarmManagementService.name }}
+  ports:
+    - port: {{ .Values.alarmManagementService.portNumber }}
+      targetPort: {{ .Values.alarmManagementService.portNumber }}
+      protocol: TCP
+      name: {{ .Values.alarmManagementService.name }}-web
+  type: NodePort

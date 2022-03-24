@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.deviceManagementMigration.configmapName }}
+data:
+  DB_HOST: {{ .Values.deviceManagementPG.fullnameOverride }}
+  DB_NAME: {{ .Values.deviceManagementPG.postgresqlDatabase }}
+  DB_PORT: {{ .Values.deviceManagementPG.service.port | quote }}
+  MIGRATION_DB_USER: {{ .Values.deviceManagementPG.postgresqlUsername}}

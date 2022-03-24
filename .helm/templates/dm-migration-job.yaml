@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.deviceManagementMigration.name }}-{{ .Chart.AppVersion }}
+  labels:
+    app: {{ .Values.deviceManagementMigration.name }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deviceManagementMigration.name }}
+    spec:
+      initContainers:
+      - name: busybox
+        image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+        imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+        securityContext:
+        {{- toYaml .Values.busybox.securityContext | nindent 12 }}
+        command:
+          - sh
+          - -c
+          - |
+            echo 'Waiting for PostgreSQL to become ready...'
+            until printf "." && nc -z -w 2 {{ printf "%s" .Values.deviceManagementPG.fullnameOverride }} {{ .Values.deviceManagementPG.service.port }}; do
+                sleep 10;
+            done;
+
+            echo 'PostgreSQL OK ?'
+      containers:
+        - name: {{ .Values.deviceManagementMigration.name }}
+          image: "{{ .Values.deviceManagementMigration.image.repository }}:{{ .Values.deviceManagementMigration.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.deviceManagementMigration.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ .Values.deviceManagementMigration.configmapName }}
+          - secretRef:
+              name: {{ .Values.deviceManagementMigration.secretName }}
+      restartPolicy: {{ .Values.deviceManagementMigration.job.restartPolicy }}

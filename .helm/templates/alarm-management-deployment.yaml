@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.alarmManagementService.name }}
+  labels:
+    app: {{ .Values.alarmManagementService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.alarmManagementService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.alarmManagementService.name }}
+    spec:
+      serviceAccountName: app-service-account
+      initContainers:
+        - name: "{{ .Chart.Name }}-init"
+          image: "groundnuty/k8s-wait-for:1.3"
+          imagePullPolicy: Always
+          args:
+            - "job"
+            - "{{ .Values.alarmManagementMigration.name }}-{{ .Chart.AppVersion }}"
+        - name: auth-server-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for auth-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Values.authServer.name }} {{ .Values.authServer.portNumber }}; do
+                  sleep 10;
+              done;
+              echo 'auth-server OK ?'
+      containers:
+        - name: {{ .Values.alarmManagementService.name }}
+          image: {{ .Values.alarmManagementService.image }}
+          env:
+            - name: ISSUER
+              value: {{ .Values.alarmManagementService.issuer }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.alarmManagementService.secretName }}
+            - configMapRef:
+                name: {{ .Values.alarmManagementService.configmapName }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.alarmManagementService.portNumber }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: {{ .Values.alarmManagementService.portNumber }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ .Values.alarmManagementService.portNumber }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: {{ .Values.alarmManagementService.resources.limits.cpu }}
+              memory: {{ .Values.alarmManagementService.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.alarmManagementService.resources.requests.cpu }}
+              memory: {{ .Values.alarmManagementService.resources.requests.memory }}

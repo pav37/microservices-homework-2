@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.notificationService.configmapName }}
+data:
+  SPRING_REDIS_PORT: {{ .Values.notificationService.redis.port | quote }}
+  SPRING_REDIS_HOST: {{ .Values.notificationService.redis.host }}
+  APP_PORT: {{ .Values.deviceManagementService.portNumber | quote }}
+  JAVA_OPTS: -Xms128m -Xmx256m

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.migration.configmapName }}
+data:
+  DB_HOST: {{ .Values.appPG.fullnameOverride }}
+  DB_NAME: {{ .Values.appPG.postgresqlDatabase }}
+  DB_PORT: {{ .Values.appPG.service.port | quote }}
+  MIGRATION_DB_USER: {{ .Values.appPG.postgresqlUsername}}

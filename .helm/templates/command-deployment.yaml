@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.commandService.name }}
+  labels:
+    app: {{ .Values.commandService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.commandService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.commandService.name }}
+    spec:
+      serviceAccountName: app-service-account
+      initContainers:
+        - name: auth-server-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for auth-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Values.authServer.name }} {{ .Values.authServer.portNumber }}; do
+                  sleep 10;
+              done;
+              echo 'auth-server OK ?'
+        - name: kafka-checker
+          image: "{{ .Values.busybox.image.repository }}:{{ .Values.busybox.image.tag }}"
+          imagePullPolicy: {{ .Values.busybox.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for kafka-server to become ready...'
+              until printf "." && nc -z -w 2 {{ printf "%s" .Release.Name }}-kafka 9092; do
+                  sleep 10;
+              done;
+              echo 'kafka-server OK ?'
+      containers:
+        - name: {{ .Values.commandService.name }}
+          image: {{ .Values.commandService.image }}
+          env:
+            - name: ISSUER
+              value: {{ .Values.commandService.issuer }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.commandService.configmapName }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.commandService.portNumber }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: {{ .Values.commandService.portNumber }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ .Values.commandService.portNumber }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: {{ .Values.commandService.resources.limits.cpu }}
+              memory: {{ .Values.commandService.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.commandService.resources.requests.cpu }}
+              memory: {{ .Values.commandService.resources.requests.memory }}

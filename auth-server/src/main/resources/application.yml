@@ -1,0 +1,32 @@
+server:
+  port: 9000
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+logging:
+  level:
+    root: DEBUG
+    org.springframework: TRACE
+#    org.springframework.web: DEBUG
+#    org.springframework.security: DEBUG
+#    org.springframework.security.oauth2: DEBUG
+
+config:
+  issuer: http://auth-server:9000
+  redirectUri: http://arch1.homework
+
+spring.datasource.url: jdbc:postgresql://${APP_DB_HOST:192.168.137.77}:${APP_DB_PORT:30533}/${APP_DB_NAME:app}
+spring.datasource.username: ${APP_DB_USERNAME:app}
+spring.datasource.password: ${APP_DB_PASSWORD:qwer}
+spring.datasource.driver-class-name: org.postgresql.Driver
+spring.jpa.database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+kafka:
+  consumer:
+    id: consumerServer
+  producer:
+    id: producerServer
+  server: app-kafka:9092
+  group:
+    id: server.broadcast

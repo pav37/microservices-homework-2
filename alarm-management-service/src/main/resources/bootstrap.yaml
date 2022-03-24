@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    consul:
+      host: consul-headless.consul.svc.cluster.local
+      port: 8500
+      config:
+        format: YAML
+        enabled: true
+        prefix: config
+        defaultContext: apps
+        profileSeparator: '::'

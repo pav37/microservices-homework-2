@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.commandService.configmapName }}
+data:
+  APP_PORT: {{ .Values.commandService.portNumber | quote }}
+  JAVA_OPTS: -Xms128m -Xmx256m
