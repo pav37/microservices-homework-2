@@ -4,7 +4,7 @@
 Манифесты развертываются в namespace auth
 
 # 2. Проверка
-## Выполнить Postman Collection для приведенного выше сценария
+## Выполнить Postman Collection
     newman run --insecure Microservices.postman_collection.json
 
 # 3. Решение
@@ -41,7 +41,7 @@
 5. **Notification Service** получает событие **adapter.value_set_sent** и отправляет его в **Push Service**.
 6. **Push Service** отправляет всем подписанным клиентам по WebSocket уведомление с выполненной командой.
 
-![Схема](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/pav37/stream-processing-homework/main/sequence-diagram/Command_success.puml)
+![Схема](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/pav37/microservices-homework-2/main/sequence-diagram/Command_success.puml)
 
 ### Отправка команды с ошибкой
 1. Пользователь отправляет команду для устройства на сервис Command Service.
@@ -54,7 +54,7 @@
 6. **Notification Service** получает событие **adapter.value_set_sent** и отправляет его в **Push Service**.
 7. **Push Service** отправляет всем подписанным клиентам по WebSocket уведомление с ошибкой по выполненной транзакции.
 
-![Схема](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/pav37/stream-processing-homework/main/sequence-diagram/Command_fail.puml)
+![Схема](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/pav37/microservices-homework-2/main/sequence-diagram/Command_fail.puml)
 
 # Удаление развернутых ресурсов
     helm -n auth delete app 
